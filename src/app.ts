@@ -13,7 +13,7 @@ app.use('/api/v1/students', StudentRoutes);
 
 const getAController = (req: Request, res: Response) => {
   // const a = 10;
-  res.send('runing');
+  res.send("server running");
 };
 
 app.get('/', getAController);
