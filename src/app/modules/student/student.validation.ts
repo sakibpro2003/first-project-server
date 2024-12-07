@@ -6,11 +6,11 @@ const StudentNameSchema = z.object({
     .trim()
     .max(20, 'First name max length can be 20')
     .refine(
-      (value) => value.charAt(0) === value.charAt(0).toUpperCase(),
+      (value : string) => value.charAt(0) === value.charAt(0).toUpperCase(),
       'First name must start with an uppercase letter',
     ),
   middleName: z.string().trim().optional(),
-  lastName: z.string().refine((value) => /^[A-Za-z]+$/.test(value), {
+  lastName: z.string().refine((value:) => /^[A-Za-z]+$/.test(value), {
     message: 'Last name must only contain alphabetic characters',
   }),
 });
@@ -40,7 +40,7 @@ const createStudentValidationSchema = z.object({
     student: z.object({
       name: StudentNameSchema,
       gender: z.enum(['male', 'female', 'other']),
-      dateOfBirth: z.date().optional(),
+      dateOfBirth: z.string().optional(),
       email: z.string().email(),
       contactNo: z.string(),
       emergencyContactNo: z.string(),

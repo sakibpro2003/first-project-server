@@ -75,7 +75,7 @@ const studentSchema = new Schema<TStudent>({
   },
   name: userNameSchema,
   gender: ['male', 'female'],
-  dateOfBirth: { type: Date },
+  dateOfBirth: { type: String },
   email: { type: String, required: true },
   contactNo: { type: String, required: true },
   emergencyContactNo: { type: String, required: true },
@@ -83,6 +83,10 @@ const studentSchema = new Schema<TStudent>({
   presentAddress: { type: String, required: true },
   permanentAddres: { type: String, required: true },
   guardian: guardianSchema,
+  admissionSemester: {
+    type: Schema.Types.ObjectId,
+    ref: "AcademicSemester"
+  },
   localGuardian: localGuradianSchema,
   profileImg: { type: String },
 });
