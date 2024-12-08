@@ -1,10 +1,8 @@
-import { Schema, model } from 'mongoose';
-import { IUser } from './user.interface';
-import config from '../../config';
 import bcrypt from 'bcrypt';
-// import { boolean } from 'joi';
-
-const userSchema = new Schema<IUser>(
+import { Schema, model } from 'mongoose';
+import config from '../../config';
+import { TUser } from './user.interface';
+const userSchema = new Schema<TUser>(
   {
     id: {
       type: String,
@@ -15,17 +13,18 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
     },
-    needPasswordChange: {
+    needsPasswordChange: {
       type: Boolean,
-      required: true,
+      default: true,
     },
     role: {
       type: String,
-      enum: ['admin', 'student', 'faculty'],
+      enum: ['student', 'faculty', 'admin'],
     },
     status: {
       type: String,
-      enum: ['inProgress', 'blocked'],
+      enum: ['in-progress', 'blocked'],
+      default: 'in-progress',
     },
     isDeleted: {
       type: Boolean,
@@ -37,36 +36,21 @@ const userSchema = new Schema<IUser>(
   },
 );
 
-//pre save middleware mongoose/hook
 userSchema.pre('save', async function (next) {
-  // console.log(this, 'we will save the data :pre hook');
-  //hashing password and saving in DB
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this;
+  const user = this; // doc
+  // hashing password and save into DB
   user.password = await bcrypt.hash(
     user.password,
-    Number(config.bcrypt_salt_round),
+    Number(config.bcrypt_salt_rounds),
   );
   next();
 });
 
-//post save middleware mongoose / hook
-userSchema.post('save', function (doc, next) {
-  // console.log(this, 'we have saved data : post hook');
-  doc.password = '';
-  console.log('password hashed and hide as an empty string');
-  next();
-});
-
-// studentSchema.pre('find',function(next){
-//   this.find({isDeleted: {$ne: true}})
-// next();
-// })
-
-// //createing a custom static method
+// set '' after saving password
 userSchema.post('save', function (doc, next) {
   doc.password = '';
   next();
 });
 
-export const User = model<IUser>('User', userSchema);
+export const User = model<TUser>('User', userSchema);
