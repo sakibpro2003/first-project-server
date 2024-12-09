@@ -6,15 +6,23 @@ import { TStudent } from './student.interface';
 import { Student } from './student.model';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  const queryObj = { ...query }; // copy
   let searchTerm = '';
   if (query?.searchTerm) {
     searchTerm = query?.searchTerm as string;
   }
-  const result = await Student.find({
-    $or: ['email', 'name.firstName', 'presentAddress'].map((field) => ({
+  const studentSearchAbleFields = ['email', 'name.firstName', 'presentAddress'];
+  const searchQuery = Student.find({
+    $or: studentSearchAbleFields.map((field) => ({
       [field]: { $regex: searchTerm, $options: 'i' },
     })),
-  })
+  });
+
+  //filtering
+  const excludeFields = ['searchTerm', 'sort', 'limit'];
+  excludeFields.forEach((el) => delete queryObj[el]);
+  const filterQuery = searchQuery
+    .find(queryObj)
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
@@ -23,7 +31,21 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
       },
     });
 
-  return result;
+  let sort = '-createdAt';
+  if (query.sort) {
+    sort = query.sort as string;
+  }
+
+  const sortQuery = filterQuery.sort(sort);
+
+  let limit = 1;
+  if (query.limit) {
+    limit = query.limit as number;
+  }
+
+  const limitQuery = sortQuery.limit(limit);
+
+  return limitQuery;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
@@ -44,17 +66,6 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
   const modifiedUpdatedData: Record<string, unknown> = {
     ...remainingStudentData,
   };
-
-  /*
-    guardain: {
-      fatherOccupation:"Teacher"
-    }
-
-    guardian.fatherOccupation = Teacher
-
-    name.firstName = 'Mezba'
-    name.lastName = 'Abedin'
-  */
 
   if (name && Object.keys(name).length) {
     for (const [key, value] of Object.entries(name)) {
