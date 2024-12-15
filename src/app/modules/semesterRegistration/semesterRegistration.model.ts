@@ -1,6 +1,6 @@
+import mongoose, { Schema } from 'mongoose';
 import { SemesterRegistrationStatus } from './semesterRegistration.constant';
 import { TSemesterRegistration } from './semesterRegistration.interface';
-import mongoose, { Schema } from 'mongoose';
 
 const semesterRegistrationSchema = new mongoose.Schema<TSemesterRegistration>(
   {
@@ -25,11 +25,11 @@ const semesterRegistrationSchema = new mongoose.Schema<TSemesterRegistration>(
     },
     minCredit: {
       type: Number,
-      required: true,
+      default: 3,
     },
     maxCredit: {
       type: Number,
-      required: true,
+      default: 15,
     },
   },
   {
